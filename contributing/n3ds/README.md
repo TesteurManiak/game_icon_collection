@@ -14,6 +14,10 @@
 6. Put all your 3DS rom files here
 7. Run one of the following scripts depending on your operating system:
    * Windows: `generate_icons.bat`
-   * Linux/macOS: `generate_icons.sh`
+   * Linux/macOS: First make the script executable (only needed once), then run it:
+     ```
+     chmod +x generate_icons.sh
+     ./generate_icons.sh
+     ```
 8. The script will automatically extract the icons and move them to the proper location.
 9. Once it's done, click the "commit to main" button in GitHub Desktop, to upload your changes to your forked repository.
