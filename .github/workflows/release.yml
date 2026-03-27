@@ -1,0 +1,59 @@
+name: Release Icons
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "icons/**"
+    workflow_dispatch:
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Generate version tag
+              id: version
+              run: |
+                  BASE="v$(date '+%Y.%m.%d')"
+                  TAG=$BASE
+                  COUNT=1
+                  while git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; do
+                    TAG="${BASE}.${COUNT}"
+                    COUNT=$((COUNT + 1))
+                  done
+                  echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+            - name: Count icons
+              id: count
+              run: |
+                  TOTAL=$(find icons/ -name "*.png" | wc -l | tr -d ' ')
+                  echo "total=${TOTAL}" >> "$GITHUB_OUTPUT"
+
+            - name: Create zip archive
+              run: zip -r "game-icons-${{ steps.version.outputs.tag }}.zip" icons/
+
+            - name: Create release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.version.outputs.tag }}
+                  name: "Game Icons ${{ steps.version.outputs.tag }}"
+                  body: |
+                      Icon pack containing all **${{ steps.count.outputs.total }} icons** in this collection, organized by platform.
+
+                      ## Structure
+                      ```
+                      icons/
+                      └── n3ds/   ← Nintendo 3DS icons (PNG, 48×48)
+                      ```
+
+                      Extract the zip to get the full `icons/` folder.
+                  files: "game-icons-${{ steps.version.outputs.tag }}.zip"
